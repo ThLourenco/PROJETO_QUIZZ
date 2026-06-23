@@ -21,3 +21,7 @@ transition: 0.4s ;
     background-color: #d10711;
     opacity: 0.4;
 }
+
+.hide{
+    display: none;
+}
