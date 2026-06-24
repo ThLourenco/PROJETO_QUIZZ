@@ -7,6 +7,8 @@ import { QuizProvider } from "../context/quiz.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
+    {/* “Tudo que estiver dentro de QuizProvider (App e todos os filhos dele) vai ter acesso ao estado global do quiz.” */}
+    {/* estou dizend oque todos componentes podem usar: useContext(QuizContext) */}
     <QuizProvider><App/></QuizProvider>
   </StrictMode>,
 );

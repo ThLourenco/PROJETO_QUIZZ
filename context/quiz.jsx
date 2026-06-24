@@ -5,20 +5,22 @@ import Question from "../components/Question";
 const STAGES = ["Start", "Category", "Playing", "End"];
 
 const initialStage = {
-  gameStage: STAGES[0],
-  questions,
-  currentQuestion: 0,
-  score: 0,
-  answerSelected: false,
-  help: false,
-  optionToHide: null
+  //definindo valores iniciais do jogo
+  gameStage: STAGES[0], // tela inicial
+  questions, //pergunta importadas
+  currentQuestion: 0, //primeira pergunta
+  score: 0, //pontuaçao
+  answerSelected: false, // nenhuma resposta escolhida
+  help: false, // nenhuma ajuda ativa
+  optionToHide: null, //nenhuma opçao escolhida
 };
 
+//stado = estado inicial , action = açao enviada pelo dispatch
 const quizReducer = (state, action) => {
   switch (action.type) {
     case "CHANGE_STATE":
       return {
-        ...state,
+        ...state, //estou pegando a propriedade original do objeto, e depois alterando
         gameStage: STAGES[1],
       };
 
@@ -31,7 +33,7 @@ const quizReducer = (state, action) => {
       });
 
       return {
-        ...state,
+        ...state, //estou pegando a propriedade original do objeto, e depois alterando
         questions: quizQuestions,
         gameStage: STAGES[2],
       };
@@ -42,7 +44,7 @@ const quizReducer = (state, action) => {
         return Math.random() - 0.5;
       });
       return {
-        ...state,
+        ...state, //estou pegando a propriedade original do objeto, e depois alterando
         questions: reorderedQuestions,
       };
 
@@ -53,7 +55,7 @@ const quizReducer = (state, action) => {
         endGame = true;
       }
       return {
-        ...state,
+        ...state, //estou pegando a propriedade original do objeto, e depois alterando
         currentQuestion: nextQuestion,
         gameStage: endGame ? STAGES[3] : state.gameStage,
         answerSelected: false,
@@ -73,7 +75,7 @@ const quizReducer = (state, action) => {
       if (answer === option) correctAnswer = 1;
 
       return {
-        ...state,
+        ...state, //estou pegando a propriedade original do objeto, e depois alterando
         score: state.score + correctAnswer,
         answerSelected: option,
       };
@@ -90,27 +92,58 @@ const quizReducer = (state, action) => {
       let repeat = true;
       let optionToHide;
 
-      questionWithOutOption.options.forEach((option) =>{
-        if(option !== questionWithOutOption.answer && repeat){
+      questionWithOutOption.options.forEach((option) => {
+        if (option !== questionWithOutOption.answer && repeat) {
           optionToHide = option;
           repeat = false;
         }
-      })
+      });
 
-      return{
-        ...state,
+      return {
+        ...state, //estou pegando a propriedade original do objeto, e depois alterando
         optionToHide,
         help: true,
-      }
+      };
 
     default:
       return state;
   }
 };
 
+//Criando context "caixa glboal" onde poderá guarda dados para varios componentes acessarem sem precisar passar props
 export const QuizContext = createContext();
+
 //children componentes dentro de componentes
+/*
+  QuizProvider = componente que envolve o app inteiro
+  Ele serve para "distribuir" estado global (quiz) para todos os filhos
+*/
 export const QuizProvider = ({ children }) => {
+  /*
+    useReducer cria 2 coisas:
+
+    1. state  → os dados atuais do quiz
+    2. dispatch → função que muda esses dados
+
+    quizReducer → regras de como o estado muda
+    initialStage → estado inicial do quiz
+  */
   const value = useReducer(quizReducer, initialStage);
+  // QuizContext.Provider - Ele pega um valor e “distribui” para todos os componentes dentro dele.
+  // value={value} "esse é o dado que eu quero compartilhar globalmente"
+  //no caso const value = useReducer(quizReducer, initialStage);
+  //O que é {children}? children significa: tudo que está dentro do Provider
+  /* 
+  <QuizProvider>
+  <App />
+  </QuizProvider>
+  */
   return <QuizContext.Provider value={value}>{children}</QuizContext.Provider>;
+  //“Pegue o valor do quiz (state + dispatch) e disponibilize para todos os componentes dentro do App.”
+  
+  /* Cria uma caixa global chamada QuizContext
+  e coloca dentro dela o estado do quiz (value)
+  Depois envolve o App inteiro nessa caixa,
+  para que qualquer componente possa acessar esse estado.
+  */
 };
